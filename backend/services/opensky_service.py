@@ -3,10 +3,23 @@ import httpx
 async def get_all_flights():
     url="https://opensky-network.org/api/states/all"
 
-    async with httpx.AsyncClient() as client:
-        response= await client.get(url)
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        try: 
+            response= await client.get(url)
+            response.raise_for_status()
+            return response.json()
 
-    return response.json()
+        except httpx.HTTPStatusError as e:
+            print(f"HTTP error : {e}")
+
+        except httpx.connectError as e:
+            print(f"connection error :{e}")
+
+        except httpx.TimeoutException as e:
+            print(f"Request timed out :{e}")
+    
+
+    
 
     
 async def get_flight_by_callsign(callsign:str):
